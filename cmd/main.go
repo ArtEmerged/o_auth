@@ -4,9 +4,10 @@ import (
 	"log"
 	"net"
 
-	grpc_user "github.com/ArtEmerged/o_auth-server/internal/grpc/user"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+
+	grpc_user "github.com/ArtEmerged/o_auth-server/internal/grpc/user"
 )
 
 func main() {
@@ -18,8 +19,8 @@ func main() {
 
 	s := grpc.NewServer()
 	reflection.Register(s)
-
 	grpc_user.Register(s)
+	
 	if err = s.Serve(l); err != nil {
 		log.Println(err)
 	}

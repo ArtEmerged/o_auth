@@ -1,8 +1,9 @@
 package grpc_user
 
 import (
-	desc "github.com/ArtEmerged/o_auth-server/pkg/auth_v1"
 	"google.golang.org/grpc"
+
+	desc "github.com/ArtEmerged/o_auth-server/pkg/auth_v1"
 )
 
 type userServer struct {
