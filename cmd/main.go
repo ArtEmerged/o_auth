@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
 
@@ -11,7 +12,7 @@ import (
 )
 
 func main() {
-	l, err := net.Listen("tcp", ":5051")
+	l, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		panic(err)
 	}
@@ -20,9 +21,10 @@ func main() {
 	s := grpc.NewServer()
 	reflection.Register(s)
 	grpc_user.Register(s)
-	
+
+	fmt.Println("listen on :50051")
+
 	if err = s.Serve(l); err != nil {
 		log.Println(err)
 	}
-
 }

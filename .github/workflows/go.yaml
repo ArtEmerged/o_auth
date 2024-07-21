@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  REGISTRY: cr.selcloud.ru/test-auth
+  IMAGE_NAME: auth-server
+  CONTAINER_NAME: auth-server-container
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -65,3 +70,44 @@ jobs:
 
           # Optional: The mode to install golangci-lint. It can be 'binary' or 'goinstall'.
           # install-mode: "goinstall"
+  image-build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout master
+        uses: actions/checkout@v3
+
+      - name: setup docker duildex
+        uses: docker/setup-buildx-actions@v2
+
+      - name: login docker registry
+        uses: docker login -u ${{ secrets.REGISTRY_USER }} -p ${{ secrets.REGISTRY_PASSWORD }} $REGISTRY
+
+      - name: build and push docker image
+        uses: |
+          TAG_NAME=$(echo $GITHUB_SHA | head -c7)
+          docker buildx create --use
+          docker buildx build --no-cache --push --tag $REGISTRY/$IMAGE_NAME:$TAG_NAME .
+
+  deploy_image:
+      runs-on: ubuntu-latest
+      needs: image-build-and-push
+
+      steps:
+        - name: deploy to selectel cloud via SSH action
+          uses: appleboy/ssh-action@v1.0.0
+          with:
+            host: ${{ secrets.SERVER_HOST }}
+            username: ${{ secrets.SSH_USERNAME }}
+            key: ${{ secrets.SSHKEY }}
+            envs: IMAGE_NAME,REGISTRY,GITHUB_SHA,CONTAINER_NAME
+            scripts: |
+              TAG_NAME=$(echo $GITHUB_SHA | head -c7)
+              docker login -u ${{ secrets.REGISTRY_USER }} -p ${{ secrets.REGISTRY_PASSWORD }} $REGISTRY
+              
+              docker stop $CONTAINER_NAME
+              
+              docker rm $CONTAINER_NAME
+              
+              docker run -d -p 50051:50051 --name $CONTAINER_NAME -t $REGISTRY/$IMAGE_NAME:$TAG_NAME
+

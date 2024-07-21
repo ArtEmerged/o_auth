@@ -27,3 +27,20 @@ generate-auth-api:
 	--plugin=protoc-gen-go-grpc=bin/protoc-gen-go-grpc \
 	api/auth_v1/auth.proto
 
+SERVER_HOST := $(SERVER_HOST)
+SSH_USERNAME := $(SSH_USERNAME)
+
+build:
+	GOOS=linux GOARCH=amd64 go build -o auth_server cmd/main.go
+
+copy-to-server:
+	scp auth_server $(SSH_USERNAME)@$(SERVER_HOST):
+
+
+REGISTRY_URL := $(REGISTRY_URL)
+REGISTRY_USER := $(REGISTRY_USER)
+REGISTRY_PASSWORD := $(REGISTRY_PASSWORD)
+
+docker-build:
+	docker buildx build --no-cache --platform linux/amd64 -t $(REGISTRY_URL)/auth-server:v0.0.1 .
+	docker login -u $(REGISTRY_USER) -p $(REGISTRY_PASSWORD) $(REGISTRY_URL)
