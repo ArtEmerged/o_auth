@@ -70,7 +70,7 @@ func (r *userRepo) GetUser(ctx context.Context, id int64) (*def.User, error) {
 		&resp.Role,
 	)
 	if err != nil {
-		if errors.As(err, &pgx.ErrNoRows) {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf("user %w", def.ErrNotFound)
 		}
 		return nil, fmt.Errorf("failed get user:%w", err)

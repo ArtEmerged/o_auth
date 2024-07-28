@@ -36,7 +36,7 @@ func (s *userServer) GetUser(ctx context.Context, in *desc.GetUserRequest) (*des
 
 	user, err := s.service.GetUser(ctx, in.GetId())
 	if err != nil {
-		if errors.As(err, &def.ErrNotFound) {
+		if errors.Is(err, def.ErrNotFound) {
 			return nil, status.Error(codes.NotFound, err.Error())
 		}
 		return nil, status.Error(codes.Internal, err.Error())
