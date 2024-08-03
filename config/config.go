@@ -8,7 +8,10 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-const serverHost = "localhost"
+const (
+	serverHost     = "localhost"
+	defaultEnvFile = ".env"
+)
 
 type config struct {
 	ServerPort string `envconfig:"SERVER_PORT" default:"50051"`
@@ -21,8 +24,6 @@ type config struct {
 
 	SaltPassword string `envconfig:"SALT_PASSWORD"`
 }
-
-const defaultEnvFile = ".env"
 
 // New creates a new config.
 func New() *config {
