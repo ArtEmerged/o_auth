@@ -14,6 +14,9 @@ type userServer struct {
 	service def.UserService
 }
 
+// Register registers the user service on the gRPC server.
+// s - pointer to the gRPC server
+// service - the user service interface to be registered
 func Register(s *grpc.Server, service def.UserService) {
 	desc.RegisterUserV1Server(s, &userServer{service: service})
 }

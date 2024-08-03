@@ -8,10 +8,8 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-
-
-func NewPostgres(dbDNS string) *pgxpool.Pool {
-	ctx := context.Background()
+// NewPostgres creates a new postgres connection.
+func NewPostgres(ctx context.Context, dbDNS string) *pgxpool.Pool {
 
 	conn, err := pgxpool.Connect(ctx, dbDNS)
 

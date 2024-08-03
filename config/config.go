@@ -2,12 +2,13 @@ package config
 
 import (
 	"fmt"
-	"log"
 	"net"
 
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 )
+
+const serverHost = "localhost"
 
 type config struct {
 	ServerPort string `envconfig:"SERVER_PORT" default:"50051"`
@@ -23,33 +24,37 @@ type config struct {
 
 const defaultEnvFile = ".env"
 
+// New creates a new config.
 func New() *config {
 	return &config{}
 }
 
-func (cfg *config) Init(path string) {
+// Init initializes the config.
+func (cfg *config) Init(path string) error {
 	if path == "" {
 		path = defaultEnvFile
 	}
 
 	err := godotenv.Load(path)
 	if err != nil {
-		log.Println("failed load env")
-		panic(err)
+		return fmt.Errorf("failed load env: %w", err)
 	}
 
 	err = envconfig.Process("", cfg)
 	if err != nil {
-		log.Println("failed parse env")
-		panic(err)
+		return fmt.Errorf("failed parse env: %w", err)
 	}
+
+	return nil
 }
 
+// GetDbDNS returns the database connection string.
 func (cfg *config) GetDbDNS() string {
 	return fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable",
 		cfg.DBHost, cfg.DBPort, cfg.DBName, cfg.DBUser, cfg.DBPassword)
 }
 
+// GetServerAddress returns the server address.
 func (cfg *config) GetServerAddress() string {
-	return net.JoinHostPort("localhost", cfg.ServerPort)
+	return net.JoinHostPort(serverHost, cfg.ServerPort)
 }

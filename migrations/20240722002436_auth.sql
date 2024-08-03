@@ -1,12 +1,12 @@
 -- +goose Up
 CREATE TABLE users (
     id serial PRIMARY KEY,
-    name text NOT NULL UNIQUE,
-    email text NOT NULL UNIQUE,
-    pass_hash text NOT NULL,
-    created_at timestamptz  NOT NULL,
-    updated_at timestamptz,
-    deleted_at timestamptz,
+    name varchar(256) NOT NULL,
+    email varchar(256) NOT NULL UNIQUE,
+    pass_hash varchar(64) NOT NULL,
+    created_at timestamp NOT NULL,
+    updated_at timestamp,
+    status varchar(10) NOT NULL DEFAULT 'UNKNOWN',
     role integer NOT NULL
 );
 
