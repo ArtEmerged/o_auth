@@ -28,7 +28,11 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	db := database.NewPostgres(ctx, cfg.GetDbDNS())
+	db, err := database.NewPostgres(ctx, cfg.GetDbDNS())
+	if err != nil {
+		log.Printf("failed connection to postgres db: %v\n", err)
+		return
+	}
 	defer db.Close()
 
 	repository := repo.New(db)
