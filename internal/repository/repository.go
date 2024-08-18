@@ -1,17 +1,19 @@
 package repository
 
 import (
-	"github.com/jackc/pgx/v4/pgxpool"
+	"context"
 
-	def "github.com/ArtEmerged/o_auth-server/internal/definitions"
+	"github.com/ArtEmerged/o_auth-server/internal/model"
 )
 
-type userRepo struct {
-	db *pgxpool.Pool
-}
-
-// New creates a new instance of userRepo with the given database connection pool.
-// db - pointer to the PostgreSQL connection pool
-func New(db *pgxpool.Pool) def.UserRepo {
-	return &userRepo{db: db}
+// UserRepo defines the methods for user repository operations.
+type UserRepo interface {
+	// CreateUser creates a new user in the repository and returns the user ID.
+	CreateUser(ctx context.Context, user *model.CreateUserRequest) (id int64, err error)
+	// UpdateUser updates an existing user's information in the repository.
+	UpdateUser(ctx context.Context, user *model.UpdateUserRequest) error
+	// DeleteUser deletes a user from the repository by ID.
+	DeleteUser(ctx context.Context, id int64) error
+	// GetUser retrieves a user from the repository by ID and returns the user information.
+	GetUser(ctx context.Context, id int64) (*model.UserInfo, error)
 }

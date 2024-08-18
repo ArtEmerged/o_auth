@@ -1,4 +1,4 @@
-package definitions
+package model
 
 import (
 	"time"
@@ -33,13 +33,13 @@ const (
 // UpdateUserRequest represents an update user request.
 type UpdateUserRequest struct {
 	ID   int64
-	Name *string
+	Name string
 	Role UserRole
 }
 
 // Validate - validates the update user request.
 func (r *UpdateUserRequest) Validate() error {
-	if r.Name == nil && r.Role == RoleUnknown {
+	if r.Name == "" && r.Role == RoleUnknown {
 		return ErrWithoutChanges
 	}
 
