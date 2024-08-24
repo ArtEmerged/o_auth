@@ -31,12 +31,13 @@ func (r *userRepo) CreateUser(ctx context.Context, in *model.CreateUserRequest) 
 	err := r.db.DB().QueryRowContext(ctx, q, newUser.Name, newUser.Email, newUser.PasswordHash, newUser.CreatedAt, modelRepo.StatusActive, newUser.Role).Scan(&id)
 	if err != nil {
 		var pgErr *pgconn.PgError
+
 		if errors.As(err, &pgErr) {
 			if pgErr.Code == "23505" { // duplicate key value violates unique constraint
-				return -1, fmt.Errorf("user with email %s %w", in.Email, model.ErrAlreadyExists)
+				return -1, fmt.Errorf("%w: %s", model.ErrAlreadyExists, pgErr.Message)
 			}
-
 		}
+
 		return -1, fmt.Errorf("create user:%w", err)
 	}
 
