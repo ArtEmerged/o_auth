@@ -14,18 +14,10 @@ import (
 func (r *userRepo) UpdateUser(ctx context.Context, in *model.UpdateUserRequest) error {
 	upUser := adapter.UpdateUserRequestToRepo(in)
 
-	query := fmt.Sprintf(`
-	UPDATE %[1]s
-	SET %[2]s = $1, %[3]s = $2, %[4]s = $3
-	WHERE %[5]s = $4 AND %[6]s = $5;`,
-		tableUsers, // 1
-
-		tableUsersNameColumn,      // 2
-		tableUsersRoleColumn,      // 3
-		tableUsersUpdatedAtColumn, // 4
-		tableUsersIDColumn,        // 5
-		tableUsersStatusColumn,    // 6
-	)
+	query := `
+	UPDATE public.users
+	SET name = $1, role = $2, updated_at = $3
+	WHERE id = $4 AND status = $5;`
 
 	q := db.Query{
 		Name:     "user_repository.UpdateUser",

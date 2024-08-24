@@ -15,20 +15,10 @@ import (
 
 // GetUser retrieves a user from the repository by ID and returns the user information.
 func (r *userRepo) GetUser(ctx context.Context, id int64) (*model.UserInfo, error) {
-	query := fmt.Sprintf(`
-	SELECT %[2]s, %[3]s, %[4]s, %[5]s, %[6]s, %[7]s
-	FROM %[1]s
-	WHERE %[2]s = $1 AND %[8]s = $2;`,
-		tableUsers, // 1
-
-		tableUsersIDColumn,        // 2
-		tableUsersNameColumn,      // 3
-		tableUsersEmailColumn,     // 4
-		tableUsersCreatedAtColumn, // 5
-		tableUsersUpdatedAtColumn, // 6
-		tableUsersRoleColumn,      // 7
-		tableUsersStatusColumn,    // 8
-	)
+	query := `
+	SELECT id, name, email, created_at, updated_at, role, status
+	FROM public.users
+	WHERE id = $1 AND status = $2;`
 
 	q := db.Query{
 		Name:     "user_repository.GetUser",

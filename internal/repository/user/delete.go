@@ -10,15 +10,10 @@ import (
 
 // DeleteUser deletes a user from the repository by ID.
 func (r *userRepo) DeleteUser(ctx context.Context, id int64) error {
-	query := fmt.Sprintf(`
-	UPDATE %[1]s 
-	SET %[2]s = $1
-	WHERE %[3]s = $2 AND %[2]s = $3;`,
-		tableUsers, // 1
-
-		tableUsersStatusColumn, // 2
-		tableUsersIDColumn,     // 3
-	)
+	query := `
+	UPDATE public.users 
+	SET status = $1
+	WHERE id = $2 AND status = $3;`
 
 	q := db.Query{
 		Name:     "user_repository.DeleteUser",

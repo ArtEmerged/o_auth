@@ -17,20 +17,9 @@ import (
 func (r *userRepo) CreateUser(ctx context.Context, in *model.CreateUserRequest) (int64, error) {
 	newUser := adapter.CreateUserRequestToRepo(in)
 
-	query := fmt.Sprintf(`
-	INSERT INTO %[1]s (%[2]s, %[3]s, %[4]s, %[5]s, %[6]s, %[7]s)
-	VALUES ($1, $2, $3, $4, $5, $6) RETURNING %[8]s;`,
-		tableUsers, // 1
-
-		tableUsersNameColumn,      // 2
-		tableUsersEmailColumn,     // 3
-		tableUsersPassHashColumn,  // 4
-		tableUsersCreatedAtColumn, // 5
-		tableUsersStatusColumn,    // 6
-		tableUsersRoleColumn,      // 7
-		tableUsersIDColumn,        // 8
-
-	)
+	query := `
+	INSERT INTO public.users (name, email, pass_hash, created_at, status, role)
+	VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;`
 
 	var id int64
 
