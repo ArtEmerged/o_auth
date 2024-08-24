@@ -1,6 +1,8 @@
 package model
 
 import (
+	"fmt"
+	"strings"
 	"time"
 )
 
@@ -58,9 +60,40 @@ type UserInfo struct {
 
 // CreateUserRequest represents a create user request.
 type CreateUserRequest struct {
-	Name         string
-	Email        string
-	Password     string
-	PasswordHash string
-	Role         UserRole
+	Name            string
+	Email           string
+	Password        string
+	PasswordConfirm string
+	PasswordHash    string
+	Role            UserRole
+}
+
+// Validate - validates the create user request.
+func (r *CreateUserRequest) Validate() error {
+	var errsText []string
+
+	// validate required fields
+	if r.Name == "" {
+		errsText = append(errsText, "field name is required")
+	}
+	if r.Email == "" {
+		errsText = append(errsText, "field email is required")
+	}
+	if r.Password == "" {
+		errsText = append(errsText, "field password is required")
+	}
+	if r.PasswordConfirm == "" {
+		errsText = append(errsText, "field password_confirm is required")
+	}
+
+	// validate password
+	if r.Password != r.PasswordConfirm {
+		errsText = append(errsText, "password and password_confirm don't match")
+	}
+
+	if len(errsText) > 0 {
+		return fmt.Errorf("%w: %s", ErrInvalidArgument, strings.Join(errsText, ", "))
+	}
+
+	return nil
 }

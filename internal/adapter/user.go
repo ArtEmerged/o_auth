@@ -9,12 +9,12 @@ import (
 
 // CreateUserRequestToLocal adapts the CreateUserRequest proto to the local model.
 func CreateUserRequestToLocal(in *desc.CreateUserRequest) *model.CreateUserRequest {
-
 	return &model.CreateUserRequest{
-		Name:     in.GetName(),
-		Email:    in.GetEmail(),
-		Password: in.GetPassword(),
-		Role:     model.UserRole(in.Role),
+		Name:            in.GetName(),
+		Email:           in.GetEmail(),
+		Password:        in.GetPassword(),
+		PasswordConfirm: in.GetPasswordConfirm(),
+		Role:            model.UserRole(in.Role),
 	}
 }
 

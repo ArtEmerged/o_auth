@@ -11,4 +11,7 @@ var (
 
 	// ErrWithoutChanges is returned when there are no changes in the request.
 	ErrWithoutChanges = errors.New("without changes")
+
+	// ErrInvalidArgument is returned when an invalid argument is provided.
+	ErrInvalidArgument = errors.New("invalid arguments")
 )
