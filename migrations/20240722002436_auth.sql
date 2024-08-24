@@ -1,4 +1,6 @@
 -- +goose Up
+CREATE TYPE status_enum AS ENUM ( 'UNKNOWN', 'ACTIVE', 'BLOCKED', 'DELETED');
+
 CREATE TABLE users (
     id serial PRIMARY KEY,
     name varchar(256) NOT NULL,
@@ -6,9 +8,11 @@ CREATE TABLE users (
     pass_hash varchar(64) NOT NULL,
     created_at timestamp NOT NULL,
     updated_at timestamp,
-    status varchar(10) NOT NULL DEFAULT 'UNKNOWN',
-    role integer NOT NULL
+    status status_enum NOT NULL DEFAULT 'UNKNOWN',
+    role smallint NOT NULL 
 );
 
 -- +goose Down
 DROP TABLE users;
+
+DROP TYPE status_enum;
