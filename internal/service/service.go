@@ -1,16 +1,19 @@
 package service
 
 import (
-	def "github.com/ArtEmerged/o_auth-server/internal/definitions"
+	"context"
+
+	"github.com/ArtEmerged/o_auth-server/internal/model"
 )
 
-type userService struct {
-	repo def.UserRepo
-
-	salt []byte
-}
-
-// New creates a new user service.
-func New(repo def.UserRepo, salt string) def.UserService {
-	return &userService{repo: repo, salt: []byte(salt)}
+// UserService defines the methods for user service operations.
+type UserService interface {
+	// CreateUser creates a new user and returns the user ID.
+	CreateUser(ctx context.Context, user *model.CreateUserRequest) (id int64, err error)
+	// UpdateUser updates an existing user's information.
+	UpdateUser(ctx context.Context, user *model.UpdateUserRequest) error
+	// DeleteUser deletes a user by ID.
+	DeleteUser(ctx context.Context, id int64) error
+	// GetUser retrieves a user by ID and returns the user information.
+	GetUser(ctx context.Context, id int64) (*model.UserInfo, error)
 }
