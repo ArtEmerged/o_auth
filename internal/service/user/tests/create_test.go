@@ -4,12 +4,15 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
+	"github.com/ArtEmerged/library/client/cache"
+	cacheMock "github.com/ArtEmerged/library/client/cache/mocks"
+	"github.com/ArtEmerged/library/client/db"
 	"github.com/brianvoe/gofakeit"
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ArtEmerged/o_auth-server/internal/client/db"
 	"github.com/ArtEmerged/o_auth-server/internal/model"
 	"github.com/ArtEmerged/o_auth-server/internal/repository"
 	"github.com/ArtEmerged/o_auth-server/internal/repository/mocks"
@@ -19,6 +22,7 @@ import (
 func TestCreateUser(t *testing.T) {
 	type userRepoMockFunc func(mc *minimock.Controller) repository.UserRepo
 	type txManagerMockFunc func(mc *minimock.Controller) db.TxManager
+	type cacheMockFunc func(mc *minimock.Controller) cache.Cache
 
 	type args struct {
 		ctx context.Context
@@ -38,6 +42,8 @@ func TestCreateUser(t *testing.T) {
 			PasswordConfirm: userPassword,
 			Role:            model.RoleUser,
 		}
+
+		createAt = time.Now().UTC()
 	)
 
 	tests := []struct {
@@ -46,6 +52,7 @@ func TestCreateUser(t *testing.T) {
 		want          int64
 		wantErr       error
 		userRepoMock  userRepoMockFunc
+		cacheMock     cacheMockFunc
 		txManagerMock txManagerMockFunc
 	}{
 		{
@@ -58,8 +65,31 @@ func TestCreateUser(t *testing.T) {
 			wantErr: nil,
 			userRepoMock: func(mc *minimock.Controller) repository.UserRepo {
 				mock := mocks.NewUserRepoMock(mc)
-				mock.CreateUserMock.Expect(ctx, &req).Return(userID, nil)
+				resp := &model.UserInfo{
+					ID:        userID,
+					Name:      req.Name,
+					Email:     req.Email,
+					Role:      model.RoleUser,
+					CreatedAt: createAt,
+					UpdatedAt: nil,
+				}
+				mock.CreateUserMock.Expect(ctx, &req).Return(resp, nil)
 				return mock
+			},
+			cacheMock: func(mc *minimock.Controller) cache.Cache {
+				cacheMock := cacheMock.NewCacheMock(mc)
+
+				userInfo := &model.UserInfo{
+					ID:        userID,
+					Name:      req.Name,
+					Email:     req.Email,
+					Role:      model.RoleUser,
+					CreatedAt: createAt,
+					UpdatedAt: nil,
+				}
+
+				cacheMock.SetMock.Expect(ctx, model.UserCacheKey(userID), userInfo, 0).Return(nil)
+				return cacheMock
 			},
 			txManagerMock: func(mc *minimock.Controller) db.TxManager { return nil },
 		},
@@ -77,6 +107,7 @@ func TestCreateUser(t *testing.T) {
 			want:          -1,
 			wantErr:       fmt.Errorf("%w: %s", model.ErrInvalidArgument, "field name is required"),
 			userRepoMock:  func(mc *minimock.Controller) repository.UserRepo { return nil },
+			cacheMock:     func(mc *minimock.Controller) cache.Cache { return nil },
 			txManagerMock: func(mc *minimock.Controller) db.TxManager { return nil },
 		},
 		{
@@ -89,9 +120,10 @@ func TestCreateUser(t *testing.T) {
 			wantErr: repositoryErr,
 			userRepoMock: func(mc *minimock.Controller) repository.UserRepo {
 				mock := mocks.NewUserRepoMock(mc)
-				mock.CreateUserMock.Expect(ctx, &req).Return(-1, repositoryErr)
+				mock.CreateUserMock.Expect(ctx, &req).Return(nil, repositoryErr)
 				return mock
 			},
+			cacheMock:     func(mc *minimock.Controller) cache.Cache { return nil },
 			txManagerMock: func(mc *minimock.Controller) db.TxManager { return nil },
 		},
 	}
@@ -102,8 +134,9 @@ func TestCreateUser(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			userRepo := tt.userRepoMock(mc)
 			txManager := tt.txManagerMock(mc)
+			cache := tt.cacheMock(mc)
 
-			service := user.New(userRepo, txManager, "")
+			service := user.New(userRepo, txManager, cache, "")
 			got, err := service.CreateUser(tt.args.ctx, tt.args.req)
 			require.Equal(t, tt.wantErr, err)
 			require.Equal(t, tt.want, got)

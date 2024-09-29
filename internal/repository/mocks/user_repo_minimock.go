@@ -8,6 +8,7 @@ import (
 	"context"
 	"sync"
 	mm_atomic "sync/atomic"
+	"time"
 	mm_time "time"
 
 	"github.com/ArtEmerged/o_auth-server/internal/model"
@@ -19,7 +20,7 @@ type UserRepoMock struct {
 	t          minimock.Tester
 	finishOnce sync.Once
 
-	funcCreateUser          func(ctx context.Context, user *model.CreateUserRequest) (id int64, err error)
+	funcCreateUser          func(ctx context.Context, user *model.CreateUserRequest) (up1 *model.UserInfo, err error)
 	inspectFuncCreateUser   func(ctx context.Context, user *model.CreateUserRequest)
 	afterCreateUserCounter  uint64
 	beforeCreateUserCounter uint64
@@ -37,7 +38,7 @@ type UserRepoMock struct {
 	beforeGetUserCounter uint64
 	GetUserMock          mUserRepoMockGetUser
 
-	funcUpdateUser          func(ctx context.Context, user *model.UpdateUserRequest) (err error)
+	funcUpdateUser          func(ctx context.Context, user *model.UpdateUserRequest) (updateAt time.Time, err error)
 	inspectFuncUpdateUser   func(ctx context.Context, user *model.UpdateUserRequest)
 	afterUpdateUserCounter  uint64
 	beforeUpdateUserCounter uint64
@@ -104,7 +105,7 @@ type UserRepoMockCreateUserParamPtrs struct {
 
 // UserRepoMockCreateUserResults contains results of the UserRepo.CreateUser
 type UserRepoMockCreateUserResults struct {
-	id  int64
+	up1 *model.UserInfo
 	err error
 }
 
@@ -198,7 +199,7 @@ func (mmCreateUser *mUserRepoMockCreateUser) Inspect(f func(ctx context.Context,
 }
 
 // Return sets up results that will be returned by UserRepo.CreateUser
-func (mmCreateUser *mUserRepoMockCreateUser) Return(id int64, err error) *UserRepoMock {
+func (mmCreateUser *mUserRepoMockCreateUser) Return(up1 *model.UserInfo, err error) *UserRepoMock {
 	if mmCreateUser.mock.funcCreateUser != nil {
 		mmCreateUser.mock.t.Fatalf("UserRepoMock.CreateUser mock is already set by Set")
 	}
@@ -206,12 +207,12 @@ func (mmCreateUser *mUserRepoMockCreateUser) Return(id int64, err error) *UserRe
 	if mmCreateUser.defaultExpectation == nil {
 		mmCreateUser.defaultExpectation = &UserRepoMockCreateUserExpectation{mock: mmCreateUser.mock}
 	}
-	mmCreateUser.defaultExpectation.results = &UserRepoMockCreateUserResults{id, err}
+	mmCreateUser.defaultExpectation.results = &UserRepoMockCreateUserResults{up1, err}
 	return mmCreateUser.mock
 }
 
 // Set uses given function f to mock the UserRepo.CreateUser method
-func (mmCreateUser *mUserRepoMockCreateUser) Set(f func(ctx context.Context, user *model.CreateUserRequest) (id int64, err error)) *UserRepoMock {
+func (mmCreateUser *mUserRepoMockCreateUser) Set(f func(ctx context.Context, user *model.CreateUserRequest) (up1 *model.UserInfo, err error)) *UserRepoMock {
 	if mmCreateUser.defaultExpectation != nil {
 		mmCreateUser.mock.t.Fatalf("Default expectation is already set for the UserRepo.CreateUser method")
 	}
@@ -240,8 +241,8 @@ func (mmCreateUser *mUserRepoMockCreateUser) When(ctx context.Context, user *mod
 }
 
 // Then sets up UserRepo.CreateUser return parameters for the expectation previously defined by the When method
-func (e *UserRepoMockCreateUserExpectation) Then(id int64, err error) *UserRepoMock {
-	e.results = &UserRepoMockCreateUserResults{id, err}
+func (e *UserRepoMockCreateUserExpectation) Then(up1 *model.UserInfo, err error) *UserRepoMock {
+	e.results = &UserRepoMockCreateUserResults{up1, err}
 	return e.mock
 }
 
@@ -266,7 +267,7 @@ func (mmCreateUser *mUserRepoMockCreateUser) invocationsDone() bool {
 }
 
 // CreateUser implements repository.UserRepo
-func (mmCreateUser *UserRepoMock) CreateUser(ctx context.Context, user *model.CreateUserRequest) (id int64, err error) {
+func (mmCreateUser *UserRepoMock) CreateUser(ctx context.Context, user *model.CreateUserRequest) (up1 *model.UserInfo, err error) {
 	mm_atomic.AddUint64(&mmCreateUser.beforeCreateUserCounter, 1)
 	defer mm_atomic.AddUint64(&mmCreateUser.afterCreateUserCounter, 1)
 
@@ -284,7 +285,7 @@ func (mmCreateUser *UserRepoMock) CreateUser(ctx context.Context, user *model.Cr
 	for _, e := range mmCreateUser.CreateUserMock.expectations {
 		if minimock.Equal(*e.params, mm_params) {
 			mm_atomic.AddUint64(&e.Counter, 1)
-			return e.results.id, e.results.err
+			return e.results.up1, e.results.err
 		}
 	}
 
@@ -313,7 +314,7 @@ func (mmCreateUser *UserRepoMock) CreateUser(ctx context.Context, user *model.Cr
 		if mm_results == nil {
 			mmCreateUser.t.Fatal("No results are set for the UserRepoMock.CreateUser")
 		}
-		return (*mm_results).id, (*mm_results).err
+		return (*mm_results).up1, (*mm_results).err
 	}
 	if mmCreateUser.funcCreateUser != nil {
 		return mmCreateUser.funcCreateUser(ctx, user)
@@ -1066,7 +1067,8 @@ type UserRepoMockUpdateUserParamPtrs struct {
 
 // UserRepoMockUpdateUserResults contains results of the UserRepo.UpdateUser
 type UserRepoMockUpdateUserResults struct {
-	err error
+	updateAt time.Time
+	err      error
 }
 
 // Marks this method to be optional. The default behavior of any method with Return() is '1 or more', meaning
@@ -1159,7 +1161,7 @@ func (mmUpdateUser *mUserRepoMockUpdateUser) Inspect(f func(ctx context.Context,
 }
 
 // Return sets up results that will be returned by UserRepo.UpdateUser
-func (mmUpdateUser *mUserRepoMockUpdateUser) Return(err error) *UserRepoMock {
+func (mmUpdateUser *mUserRepoMockUpdateUser) Return(updateAt time.Time, err error) *UserRepoMock {
 	if mmUpdateUser.mock.funcUpdateUser != nil {
 		mmUpdateUser.mock.t.Fatalf("UserRepoMock.UpdateUser mock is already set by Set")
 	}
@@ -1167,12 +1169,12 @@ func (mmUpdateUser *mUserRepoMockUpdateUser) Return(err error) *UserRepoMock {
 	if mmUpdateUser.defaultExpectation == nil {
 		mmUpdateUser.defaultExpectation = &UserRepoMockUpdateUserExpectation{mock: mmUpdateUser.mock}
 	}
-	mmUpdateUser.defaultExpectation.results = &UserRepoMockUpdateUserResults{err}
+	mmUpdateUser.defaultExpectation.results = &UserRepoMockUpdateUserResults{updateAt, err}
 	return mmUpdateUser.mock
 }
 
 // Set uses given function f to mock the UserRepo.UpdateUser method
-func (mmUpdateUser *mUserRepoMockUpdateUser) Set(f func(ctx context.Context, user *model.UpdateUserRequest) (err error)) *UserRepoMock {
+func (mmUpdateUser *mUserRepoMockUpdateUser) Set(f func(ctx context.Context, user *model.UpdateUserRequest) (updateAt time.Time, err error)) *UserRepoMock {
 	if mmUpdateUser.defaultExpectation != nil {
 		mmUpdateUser.mock.t.Fatalf("Default expectation is already set for the UserRepo.UpdateUser method")
 	}
@@ -1201,8 +1203,8 @@ func (mmUpdateUser *mUserRepoMockUpdateUser) When(ctx context.Context, user *mod
 }
 
 // Then sets up UserRepo.UpdateUser return parameters for the expectation previously defined by the When method
-func (e *UserRepoMockUpdateUserExpectation) Then(err error) *UserRepoMock {
-	e.results = &UserRepoMockUpdateUserResults{err}
+func (e *UserRepoMockUpdateUserExpectation) Then(updateAt time.Time, err error) *UserRepoMock {
+	e.results = &UserRepoMockUpdateUserResults{updateAt, err}
 	return e.mock
 }
 
@@ -1227,7 +1229,7 @@ func (mmUpdateUser *mUserRepoMockUpdateUser) invocationsDone() bool {
 }
 
 // UpdateUser implements repository.UserRepo
-func (mmUpdateUser *UserRepoMock) UpdateUser(ctx context.Context, user *model.UpdateUserRequest) (err error) {
+func (mmUpdateUser *UserRepoMock) UpdateUser(ctx context.Context, user *model.UpdateUserRequest) (updateAt time.Time, err error) {
 	mm_atomic.AddUint64(&mmUpdateUser.beforeUpdateUserCounter, 1)
 	defer mm_atomic.AddUint64(&mmUpdateUser.afterUpdateUserCounter, 1)
 
@@ -1245,7 +1247,7 @@ func (mmUpdateUser *UserRepoMock) UpdateUser(ctx context.Context, user *model.Up
 	for _, e := range mmUpdateUser.UpdateUserMock.expectations {
 		if minimock.Equal(*e.params, mm_params) {
 			mm_atomic.AddUint64(&e.Counter, 1)
-			return e.results.err
+			return e.results.updateAt, e.results.err
 		}
 	}
 
@@ -1274,7 +1276,7 @@ func (mmUpdateUser *UserRepoMock) UpdateUser(ctx context.Context, user *model.Up
 		if mm_results == nil {
 			mmUpdateUser.t.Fatal("No results are set for the UserRepoMock.UpdateUser")
 		}
-		return (*mm_results).err
+		return (*mm_results).updateAt, (*mm_results).err
 	}
 	if mmUpdateUser.funcUpdateUser != nil {
 		return mmUpdateUser.funcUpdateUser(ctx, user)

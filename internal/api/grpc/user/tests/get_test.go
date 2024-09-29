@@ -61,7 +61,7 @@ func TestGetUser(t *testing.T) {
 			ID:        userId,
 			Name:      userName,
 			Email:     userEmail,
-			Role:      model.UserRole(userRole),
+			Role:      model.Role(userRole),
 			CreatedAt: createdAt,
 			UpdatedAt: nil,
 		}
@@ -69,7 +69,7 @@ func TestGetUser(t *testing.T) {
 			ID:        userId,
 			Name:      userName,
 			Email:     userEmail,
-			Role:      model.UserRole(userRole),
+			Role:      model.Role(userRole),
 			CreatedAt: createdAt,
 			UpdatedAt: &updatedAt,
 		}

@@ -14,7 +14,7 @@ func CreateUserRequestToLocal(in *desc.CreateUserRequest) *model.CreateUserReque
 		Email:           in.GetEmail(),
 		Password:        in.GetPassword(),
 		PasswordConfirm: in.GetPasswordConfirm(),
-		Role:            model.UserRole(in.Role),
+		Role:            model.Role(in.Role),
 	}
 }
 
@@ -23,7 +23,7 @@ func UpdateUserRequestToLocal(in *desc.UpdateUserRequest) *model.UpdateUserReque
 	return &model.UpdateUserRequest{
 		ID:   in.GetId(),
 		Name: in.GetName(),
-		Role: model.UserRole(in.Role),
+		Role: model.Role(in.Role),
 	}
 }
 

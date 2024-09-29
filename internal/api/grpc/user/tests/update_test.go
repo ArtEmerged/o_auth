@@ -38,12 +38,12 @@ func TestUpdateUser(t *testing.T) {
 		serviceRequest = &model.UpdateUserRequest{
 			ID:   userId,
 			Name: userName,
-			Role: model.UserRole(userRole),
+			Role: model.Role(userRole),
 		}
 		serviceRequestWithoutName = &model.UpdateUserRequest{
 			ID:   userId,
 			Name: "",
-			Role: model.UserRole(userRole),
+			Role: model.Role(userRole),
 		}
 	)
 

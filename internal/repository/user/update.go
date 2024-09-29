@@ -3,15 +3,17 @@ package user
 import (
 	"context"
 	"fmt"
+	"time"
 
-	"github.com/ArtEmerged/o_auth-server/internal/client/db"
+	"github.com/ArtEmerged/library/client/db"
+
 	"github.com/ArtEmerged/o_auth-server/internal/model"
 	"github.com/ArtEmerged/o_auth-server/internal/repository/user/adapter"
 	modelRepo "github.com/ArtEmerged/o_auth-server/internal/repository/user/model"
 )
 
 // UpdateUser updates an existing user's information.
-func (r *userRepo) UpdateUser(ctx context.Context, in *model.UpdateUserRequest) error {
+func (r *userRepo) UpdateUser(ctx context.Context, in *model.UpdateUserRequest) (updateAt time.Time, err error) {
 	upUser := adapter.UpdateUserRequestToRepo(in)
 
 	query := `
@@ -24,10 +26,10 @@ func (r *userRepo) UpdateUser(ctx context.Context, in *model.UpdateUserRequest) 
 		QueryRaw: query,
 	}
 
-	_, err := r.db.DB().ExecContext(ctx, q, upUser.Name, upUser.Role, upUser.UpdatedAt, upUser.ID, modelRepo.StatusActive)
+	_, err = r.db.DB().ExecContext(ctx, q, upUser.Name, upUser.Role, upUser.UpdatedAt, upUser.ID, modelRepo.StatusActive)
 	if err != nil {
-		return fmt.Errorf("updated user:%w", err)
+		return time.Time{}, fmt.Errorf("updated user:%w", err)
 	}
 
-	return nil
+	return upUser.UpdatedAt, nil
 }

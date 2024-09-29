@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"log"
 
 	"github.com/ArtEmerged/o_auth-server/internal/model"
 )
@@ -14,5 +15,15 @@ func (s *userService) CreateUser(ctx context.Context, in *model.CreateUserReques
 
 	in.PasswordHash = s.hashSha256(in.Password)
 
-	return s.repo.CreateUser(ctx, in)
+	userInfo, err := s.repo.CreateUser(ctx, in)
+	if err != nil {
+		return -1, err
+	}
+
+	err = s.cache.Set(ctx, model.UserCacheKey(userInfo.ID), userInfo, 0)
+	if err != nil {
+		log.Printf("WARN: failed to set user in cache: %s\n", err.Error())
+	}
+
+	return userInfo.ID, nil
 }

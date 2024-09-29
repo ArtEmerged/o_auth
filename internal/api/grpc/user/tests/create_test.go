@@ -40,7 +40,7 @@ func TestCreateUser(t *testing.T) {
 			Email:           userEmail,
 			Password:        userPassword,
 			PasswordConfirm: userPassword,
-			Role:            model.UserRole(userRole),
+			Role:            model.Role(userRole),
 		}
 	)
 

@@ -13,17 +13,18 @@ func CreateUserRequestToRepo(in *model.CreateUserRequest) *modelRepo.CreateUserR
 		Name:         in.Name,
 		Email:        in.Email,
 		PasswordHash: in.PasswordHash,
-		Role:         int32(in.Role),
+		Role:         int32ToRoleEnum(int32(in.Role)),
 		CreatedAt:    time.Now().UTC(),
 	}
 }
 
 // UpdateUserRequestToRepo adapts the UpdateUserRequest to repo model.
 func UpdateUserRequestToRepo(in *model.UpdateUserRequest) *modelRepo.UpdateUserRequest {
+
 	return &modelRepo.UpdateUserRequest{
 		ID:        in.ID,
 		Name:      in.Name,
-		Role:      int32(in.Role),
+		Role:      int32ToRoleEnum(int32(in.Role)),
 		UpdatedAt: time.Now().UTC(),
 	}
 }
@@ -34,9 +35,31 @@ func UserInfoToLocal(in *modelRepo.UserInfo) *model.UserInfo {
 		ID:        in.ID,
 		Name:      in.Name,
 		Email:     in.Email,
-		Role:      model.UserRole(in.Role),
+		Role:      roleEnumToInt32(in.Role),
 		CreatedAt: in.CreatedAt,
 		UpdatedAt: in.UpdatedAt,
 	}
 	return out
+}
+
+func int32ToRoleEnum(role int32) modelRepo.Role {
+	switch role {
+	case 1:
+		return "USER"
+	case 2:
+		return "ADMIN"
+	default:
+		return "UNKNOWN"
+	}
+}
+
+func roleEnumToInt32(role modelRepo.Role) model.Role {
+	switch role {
+	case "USER":
+		return 1
+	case "ADMIN":
+		return 2
+	default:
+		return 0
+	}
 }
