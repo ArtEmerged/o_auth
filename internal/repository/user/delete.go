@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ArtEmerged/o_auth-server/internal/client/db"
+	"github.com/ArtEmerged/library/client/db"
+
 	modelRepo "github.com/ArtEmerged/o_auth-server/internal/repository/user/model"
 )
 

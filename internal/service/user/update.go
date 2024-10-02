@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/ArtEmerged/o_auth-server/internal/model"
 )
@@ -31,5 +32,24 @@ func (s *userService) UpdateUser(ctx context.Context, in *model.UpdateUserReques
 		in.Role = user.Role
 	}
 
-	return s.repo.UpdateUser(ctx, in)
+	updatedAt, err := s.repo.UpdateUser(ctx, in)
+	if err != nil {
+		return err
+	}
+
+	userInfo := &model.UserInfo{
+		ID:        in.ID,
+		Name:      in.Name,
+		Email:     user.Email,
+		Role:      in.Role,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: &updatedAt,
+	}
+
+	err = s.cache.Set(ctx, model.UserCacheKey(in.ID), userInfo, 0)
+	if err != nil {
+		log.Printf("WARN: failed to set user in cache: %s\n", err.Error())
+	}
+
+	return nil
 }

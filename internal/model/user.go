@@ -6,37 +6,44 @@ import (
 	"time"
 )
 
-// UserRole represents a user role.
-type UserRole int32
+const userCacheKey = "users:user:%d"
+
+// UserCacheKey returns key for chat
+func UserCacheKey(chatID int64) string {
+	return fmt.Sprintf(userCacheKey, chatID)
+}
+
+// Role represents a user role.
+type Role int32
 
 const (
 	// RoleUnknown represents an unknown role.
-	RoleUnknown UserRole = iota
+	RoleUnknown Role = iota
 	// RoleUser represents the user role with normal permissions.
 	RoleUser
 	// RoleAdmin represents the admin role with all permissions.
 	RoleAdmin
 )
 
-// UserStatus represents a user status.
-type UserStatus string
+// Status represents a user status.
+type Status string
 
 const (
 	// StatusUnknown represents a user status unknown (default).
-	StatusUnknown UserStatus = "UNKNOWN"
+	StatusUnknown Status = "UNKNOWN"
 	// StatusActive represents a active user.
-	StatusActive UserStatus = "ACTIVE"
+	StatusActive Status = "ACTIVE"
 	// StatusBlocked represents a blocked user.
-	StatusBlocked UserStatus = "BLOCKED"
+	StatusBlocked Status = "BLOCKED"
 	// StatusDeleted represents a deleted user.
-	StatusDeleted UserStatus = "DELETED"
+	StatusDeleted Status = "DELETED"
 )
 
 // UpdateUserRequest represents an update user request.
 type UpdateUserRequest struct {
 	ID   int64
 	Name string
-	Role UserRole
+	Role Role
 }
 
 // Validate - validates the update user request.
@@ -50,12 +57,12 @@ func (r *UpdateUserRequest) Validate() error {
 
 // UserInfo represents a user information.
 type UserInfo struct {
-	ID        int64
-	Name      string
-	Email     string
-	CreatedAt time.Time
-	UpdatedAt *time.Time
-	Role      UserRole
+	ID        int64      `json:"id"`
+	Name      string     `json:"name"`
+	Email     string     `json:"email"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt *time.Time `json:"updated_at"`
+	Role      Role       `json:"role"`
 }
 
 // CreateUserRequest represents a create user request.
@@ -65,7 +72,7 @@ type CreateUserRequest struct {
 	Password        string
 	PasswordConfirm string
 	PasswordHash    string
-	Role            UserRole
+	Role            Role
 }
 
 // Validate - validates the create user request.
