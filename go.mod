@@ -5,6 +5,7 @@ go 1.22.6
 require (
 	github.com/ArtEmerged/library v0.0.6
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
+	github.com/envoyproxy/protoc-gen-validate v1.0.4
 	github.com/gojuno/minimock/v3 v3.4.0
 	github.com/jackc/pgconn v1.14.3
 	github.com/jackc/pgx/v4 v4.18.3

@@ -14,8 +14,8 @@ import (
 // UpdateUser handles the gRPC request to update an existing user.
 // It validates the input, updates the user via the service, and returns an empty response.
 func (s *Implementation) UpdateUser(ctx context.Context, in *desc.UpdateUserRequest) (*emptypb.Empty, error) {
-	if in.GetId() < 1 {
-		return nil, status.Error(codes.InvalidArgument, "negative id")
+	if err := in.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	err := s.userService.UpdateUser(ctx, adapter.UpdateUserRequestToLocal(in))

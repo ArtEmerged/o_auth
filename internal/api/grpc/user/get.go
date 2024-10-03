@@ -15,8 +15,8 @@ import (
 // GetUser handles the gRPC request to retrieve a user by ID.
 // It validates the input, retrieves the user via the service, and returns the user information.
 func (s *Implementation) GetUser(ctx context.Context, in *desc.GetUserRequest) (*desc.GetUserResponse, error) {
-	if in.GetId() < 1 {
-		return nil, status.Error(codes.InvalidArgument, "negative id")
+	if err := in.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	userInfo, err := s.userService.GetUser(ctx, in.GetId())

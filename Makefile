@@ -19,6 +19,7 @@ install-deps:
 	GOBIN=$(LOCAL_BIN) go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.51.0
 	GOBIN=$(LOCAL_BIN) go install google.golang.org/protobuf/cmd/protoc-gen-go
 	GOBIN=$(LOCAL_BIN) go install -mod=mod google.golang.org/grpc/cmd/protoc-gen-go-grpc
+	GOBIN=$(LOCAL_BIN) go install github.com/envoyproxy/protoc-gen-validate@v1.1.0
 
 install-goose:
 	GOBIN=$(LOCAL_BIN) go install github.com/pressly/goose/v3/cmd/goose@v3.14.0
@@ -31,12 +32,13 @@ generate-api: generate-auth-api
 
 generate-auth-api:
 	mkdir -p pkg/auth_v1
-
-	protoc --proto_path api/auth_v1 \
+	protoc --proto_path api/auth_v1 --proto_path vendor.protogen \
 	--go_out=pkg/auth_v1 --go_opt=paths=source_relative \
 	--plugin=protoc-gen-go=bin/protoc-gen-go \
 	--go-grpc_out=pkg/auth_v1 --go-grpc_opt=paths=source_relative \
 	--plugin=protoc-gen-go-grpc=bin/protoc-gen-go-grpc \
+	--validate_out lang=go:pkg/auth_v1 --validate_opt=paths=source_relative \
+	--plugin=protoc-gen-validate=bin/protoc-gen-validate \
 	api/auth_v1/auth.proto
 
 local-migration-status:
@@ -61,3 +63,11 @@ docker-build:
 test :
 	go test -coverprofile=coverage.out ./...
 	go tool cover -html=coverage.out -o coverage.html
+
+vendor-proto:
+		@if [ ! -d vendor.protogen/validate ]; then \
+			mkdir -p vendor.protogen/validate &&\
+			git clone https://github.com/envoyproxy/protoc-gen-validate vendor.protogen/protoc-gen-validate &&\
+			mv vendor.protogen/protoc-gen-validate/validate/*.proto vendor.protogen/validate &&\
+			rm -rf vendor.protogen/protoc-gen-validate ;\
+		fi

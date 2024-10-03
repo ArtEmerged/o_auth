@@ -13,8 +13,8 @@ import (
 // DeleteUser handles the gRPC request to delete a user by ID.
 // It validates the input, deletes the user via the service, and returns an empty response.
 func (s *Implementation) DeleteUser(ctx context.Context, in *desc.DeleteUserRequest) (*emptypb.Empty, error) {
-	if in.GetId() < 1 {
-		return nil, status.Error(codes.InvalidArgument, "negative id")
+	if err := in.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	err := s.userService.DeleteUser(ctx, in.GetId())
